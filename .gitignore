@@ -8,6 +8,14 @@ bin-release/
 # Other files and folders
 .settings/
 
+# pycharm related 
+.idea/
+__pycache__/
+
+# data related
+data_set/
+0001/
+
 # Executables
 *.swf
 *.air
