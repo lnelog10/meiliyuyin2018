@@ -12,7 +12,7 @@ TEST_TYPE_LIPS_MOUTH = False
 """
 测试开关，打开的时候，在区分数据是何种嘴型时候，会打印一些信息
 """
-TEST_COMPARE_TO_TRAIN_DATA = True
+TEST_COMPARE_TO_TRAIN_DATA = False
 
 """
 n种嘴型信息对应的人脸图片
