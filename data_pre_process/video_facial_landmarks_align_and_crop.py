@@ -29,7 +29,7 @@ time_stamp = 0
 
 while (cap.isOpened()):
     time_count = time_count + 1
-    #250ms中取中间那一帧
+    # 250ms中取中间那一帧
     time_stamp = time_count * SLOT_TIME + 125
     cap.set(cv2.CAP_PROP_POS_MSEC, time_stamp)
     ret, image = cap.read()
@@ -40,7 +40,7 @@ while (cap.isOpened()):
         print("big image type:", image.dtype)
         print("gray image type:", gray.dtype)
 
-        #取第一张人脸
+        # 取第一张人脸
         if len(rects) > 0:
             rect = rects[0]
         else:
@@ -52,8 +52,9 @@ while (cap.isOpened()):
         (x1, y1, w1, h1) = (x, y, w, h)
 
         (desireHeight, desireWidth) = image.shape[:2]
-        desireHeight = desireWidth
+        # desireHeight = desireWidth
 
+        # 取眼睛最左最右的坐标
         (leftEyeOutX, leftEyeOutY) = shape[36]
         (rightEyeOutX, rightEyeOutY) = shape[45]
         (leftEyeInnerX, leftEyeInnerY) = shape[39]
@@ -64,9 +65,11 @@ while (cap.isOpened()):
         rightEyeY = (rightEyeOutY + rightEyeInnerY) / 2
         rightEyeX = (rightEyeOutX + rightEyeInnerX) / 2
 
+        # 取左右眼的中心点坐标
         eyesCenterY = ((int)((leftEyeY + rightEyeY) / 2))
         eyesCenterX = ((int)((leftEyeX + rightEyeX) / 2))
 
+        # 计算旋转角度（以左右眼中心点为十字坐标）
         dy = (rightEyeY - leftEyeY)
         dx = (rightEyeX - leftEyeX)
         length = cv2.sqrt(dx * dx + dy * dy)
@@ -77,39 +80,57 @@ while (cap.isOpened()):
         M = cv2.getRotationMatrix2D((eyesCenterX, eyesCenterY), angle, 1)
         image = cv2.warpAffine(image, M, (desireWidth, desireHeight))
 
+        # 再检测下是否能取到人脸，能取到才保存下来
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         rects = detector(gray, 1)
 
-        #只取第一张
+        # 只取第一张人脸,
         if len(rects) > 0:
             rect = rects[0]
         else:
             continue
 
-        # shape = predictor(gray, rect)
-        # shape = face_utils.shape_to_np(shape)
-        # (x, y, w, h) = face_utils.rect_to_bb(rect)
+        shape = predictor(gray, rect)
+        shape = face_utils.shape_to_np(shape)
+        (x, y, w, h) = face_utils.rect_to_bb(rect)
+        # 取脸上下左右的坐标
+        (leftX, leftY) = shape[0]
+        (rightX, rightY) = shape[16]
+        (topX, topY) = shape[27]
+        (bottomX, bottomY) = shape[57]
+        finalWidth = (rightX - leftX)
+        finalHeight = (bottomY - topY)
 
-        # (leftX, leftY) = shape[0]
-        # (rightX, rightY) = shape[16]
-        # (topX, topY) = shape[27]
-        # (bottomX, bottomY) = shape[57]
-        # finalWidth = (rightX - leftX)
-        # finalHeight = finalWidth
+        #这里要稍微截下人脸区域，防止图片过大
+        centerFaceX_left = leftX - 2 * finalWidth
+        if centerFaceX_left < 0:
+            centerFaceX_left = 0
 
-        # centerFaceX_start = leftX
-        # centerFaceY_start = ((int)((topY + bottomY) / 2 - finalHeight / 2))
+        centerFaceX_right = rightX + 2 * finalWidth
+        if centerFaceX_right > image.shape[1]:
+            centerFaceX_right = image.shape[1]
 
-        # image = image[centerFaceY_start:centerFaceY_start + finalHeight,
-        #         centerFaceX_start:centerFaceX_start + finalWidth]
+        centerFaceY_top = topY - finalHeight * 2
+        if centerFaceY_top < 0:
+            centerFaceY_top = 0
 
-        # try:
-        if image.shape[0] == 0 or image.shape[1] == 0:
+        centerFaceY_bottom = bottomY + finalHeight * 2
+        if centerFaceY_bottom > image.shape[0]:
+            centerFaceY_bottom = image.shape[0]
+
+        image = image[centerFaceY_top:centerFaceY_bottom,
+                centerFaceX_left:centerFaceX_right]
+
+        # 可能的错误，类似判空,防止异常退出
+        try:
+            #						image = imutils.resize(image, width=112)
+            if image.shape[0] == 0 or image.shape[1] == 0:
+                image = None
+            else:
+                pass
+                # image = cv2.resize(image, (112, 112), interpolation=cv2.INTER_CUBIC)
+        except ZeroDivisionError:
             image = None
-            # else:
-            #     image = cv2.resize(image, (112, 112), interpolation=cv2.INTER_CUBIC)
-        # except ZeroDivisionError:
-        #     image = None
 
         if image is None:
             pass
@@ -119,12 +140,11 @@ while (cap.isOpened()):
 
             outputFileName = args["input"] + "{:04d}.jpg".format(time_count + 1)
             cv2.imwrite(outputFileName, image)
-            # if time_count == 982:
-            #     break
 
+        # 可有可无，这里不接收键盘输入的
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
-    else:
+    else:  # 最后一帧了，直接跳出来
         break;
 
 cap.release()

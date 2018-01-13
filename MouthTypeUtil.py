@@ -106,7 +106,7 @@ def clasifyMouthType(imgName):
         mouthInfo = MOUTH_TYPE_INFO_ARRAY[i]
         comparedPoint = getFacePoint(gray)
         imageMouthWidth = MouthInfo.getMouthWidth(comparedPoint)
-        imageWidth = image.shape[0]
+        imageWidth = image.shape[1]
 
         #先把嘴的宽度缩放至和要比对的嘴一致,再计算两个嘴之前的点距离
         imageNeedExpand = int(mouthInfo.getWidth() * imageWidth / imageMouthWidth)
@@ -123,7 +123,7 @@ def clasifyMouthType(imgName):
         print("[info] compare with %d, distace %d" % (i,distance))
 
         if(TEST_COMPARE_TO_TRAIN_DATA):
-            print("(type, compare):(%d,%d)" % (mouthInfo.getWidth(), expandMouthInfo.getWidth()))
+            print("[info]mouth width:(type, compare):(%d,%d)" % (mouthInfo.getWidth(), expandMouthInfo.getWidth()))
             print("type")
             mouthInfo.toString()
             print("compare")
