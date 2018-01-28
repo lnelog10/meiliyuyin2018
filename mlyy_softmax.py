@@ -26,6 +26,12 @@ import sys
 import tensorflow as tf
 import mlyy_dataset as input_data
 import os;
+import glob as gb
+import os;
+import scipy.misc
+import numpy
+import numpy as np
+from mlyy_softmax_sample_utils import ffmpegGenVideo
 
 VOICEDATA_LENTH = 13*25;#28*28=784
 CLASSIFIER_TYPE = 6;#10
@@ -75,10 +81,38 @@ def main(_):
   accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
   print(sess.run(accuracy, feed_dict={x: mlyy_dataset.test.images,
                                       y_: mlyy_dataset.test.labels}))
-  sample_model(x=x,W=W,b=b)
 
-def sample_model(self,x,W,b):
-    y = tf.matmul(x, W) + b
+  print("sample_model...")
+  sample_model(W=W,b=b)
+
+gen_sample_voices = "./sample/gen_sample_voices/"  # *.txt
+gen_sample_images = "./sample/gen_sample_images/"  # *.jpg
+sample_mp3 = "./sample/K.mp3"
+out_mp4 = "./sample/K.mp4"
+# 3.mp3输出对应嘴形视频
+# 3.1mp3 mfcc提取，生成txt
+# 3.2restore 网络参数，跑softmax 找到对应分类嘴形--->copy 到sample目录
+# 3.3sample里 mp3和嘴形合成视频
+def sample_model(self,W,b,sampleVoiceTxts=gen_sample_voices):
+    print('extract_voices', sampleVoiceTxts)
+    rootExt = sampleVoiceTxts + os.sep + "*"
+    txts = gb.glob(rootExt)
+    voiceFeatures = np.zeros((txts.__len__(), 13, 25))
+    for index in range(len(txts)):
+      voiceFeatures[index] = np.loadtxt(txts[index]);
+      y = tf.matmul(voiceFeatures[index], W) + b
+      #取出序号 TODO
+      cat =y
+      #保存图片
+      scipy.misc.imsave(gen_sample_images, getSampleImgName(voicePath=txts[index],sample_dir=gen_sample_voices,))
+    print("ffmpegGenVideo...")
+    ffmpegGenVideo(imageSlicesDir=gen_sample_images,mp3SampleFile=sample_mp3,outfile=out_mp4)
+
+def getSampleImgName(voicePath,sample_dir):
+    fileName = voicePath[voicePath.rindex("/")+1:]
+    temp = fileName.split('.')
+    result = '{}{}.jpg'.format(sample_dir,temp[0])
+    return result
 
 
 def save(self, checkpoint_dir="checkpoint_dir",model_dir="model_dir"):

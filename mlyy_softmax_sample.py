@@ -52,7 +52,6 @@ def voice_read():
   # 3.2restore 网络参数，跑softmax 找到对应分类嘴形--->copy 到sample目录
   # 3.3sample里 mp3和嘴形合成视频
 def main(_):
-def main(_):
 
   return
 
