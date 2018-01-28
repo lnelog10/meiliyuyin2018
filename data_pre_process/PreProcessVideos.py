@@ -13,18 +13,20 @@ import math
 """
 处理将mp3文件提取成小片段，然后提取mfcc信息，以prefix + 四位编号.txt的格式，保存在outputDir里面
 """
+
+VOICE_FRAGMENT_LENGTH = 250
 def sample_voice_process(prefix, SampleVoice, outputDir):
     song = AudioSegment.from_mp3(SampleVoice)
-    sum = int(song.__len__()/350)
+    sum = int(song.__len__()/VOICE_FRAGMENT_LENGTH)
     for i in range(sum):
-        next = (i + 1) * 350
-        first_10_seconds = song[i * 350:next]
+        next = (i + 1) * VOICE_FRAGMENT_LENGTH
+        first_10_seconds = song[i * VOICE_FRAGMENT_LENGTH:next]
         index =(i + 1);
         mp3name = os.path.join(outputDir,prefix + '{:04d}.mp3'.format(index))
         # 一般就不生成mp3了
-        # first_10_seconds.export( mp3name, format="mp3")
+        first_10_seconds.export( mp3name, format="mp3")
         y1, sr1 = librosa.load(mp3name, sr=16000)
-        mfccs = librosa.feature.mfcc(y=y1, sr=sr1, n_mfcc=13, hop_length=170, n_fft=2048)#13*35
+        mfccs = librosa.feature.mfcc(y=y1, sr=sr1, n_mfcc=13, hop_length=190, n_fft=2048)#13*35
         print("==>"+str(i)+"<==",len(mfccs).__str__() + "*" + len(mfccs[0]).__str__())
         np.savetxt(os.path.join(outputDir,prefix+'{:04d}.txt'.format(index)),mfccs)
 
