@@ -50,6 +50,7 @@ def clasifyWitchLipType(imgName):
 
 
 def main():
+    # MouthTypeUtil.generate112image()
     MouthTypeUtil.initAllTypeMouth()
     dirs = glob.glob("data_pre_process")
     for dir in dirs:

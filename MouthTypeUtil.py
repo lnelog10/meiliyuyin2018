@@ -58,10 +58,48 @@ def getFacePoint(image):
 
     return point
 
+def generate112image():
+    for index in range(len(LIP_TYPES)):
+        image = cv2.imread(LIP_TYPES[index])
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        shape = getFacePoint(gray)
+        (leftX, leftY) = shape[0]
+        (rightX, rightY) = shape[16]
+        (topX, topY) = shape[27]
+        (bottomX, bottomY) = shape[57]
+        finalWidth = (rightX - leftX)
+        finalHeight = finalWidth
+        centerFaceX_start = leftX
+        centerFaceY_start = ((int)((topY + bottomY) / 2 - finalHeight / 2))
+
+        for i in range(image.shape[0]):
+            for j in range(image.shape[1]):
+                image[i,j] = (255,255,255)
+
+        for i in range(len(shape)):
+            if(i >= 48 and i <= 67):
+                (x,y) = shape[i]
+                cv2.circle(image,(x,y), 1, (0,0,0),-1)
+
+        image = image[centerFaceY_start:centerFaceY_start + finalHeight, centerFaceX_start:centerFaceX_start + finalWidth]
+        try:
+            if image.shape[0] == 0 or image.shape[1] == 0:
+                image = None
+            else:
+                image = cv2.resize(image, (112, 112), interpolation=cv2.INTER_CUBIC)
+        except ZeroDivisionError:
+            image = None
+        if image is None:
+            pass
+        else:
+            outputFileName = "{:04d}.jpg".format(index)
+            cv2.imshow("generate",image)
+            cv2.imwrite(outputFileName, image)
+
 
 def initTypeMouthInfo(index):
     image = cv2.imread(LIP_TYPES[index])
-    image = imutils.resize(image, width=1200)
+    # image = imutils.resize(image)
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
     shape = getFacePoint(gray)
