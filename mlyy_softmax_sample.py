@@ -44,30 +44,21 @@ def voice_read():
 
 
 
-# 语音输入
-# 读取录音sample里 mp3
-# mp3输出对应嘴形视频
-# mp3 mfcc提取，生成txt
-# restore 网络参数，跑softmax 找到对应分类嘴形--->copy 到sample目录
-# sample里 mp3和嘴形合成视频
+# 1.语音输入
+# 2.读取录音sample里 mp3
+
+# 3.mp3输出对应嘴形视频
+  # 3.1mp3 mfcc提取，生成txt
+  # 3.2restore 网络参数，跑softmax 找到对应分类嘴形--->copy 到sample目录
+  # 3.3sample里 mp3和嘴形合成视频
 def main(_):
+def main(_):
+
   return
 
 
 
 
-def save(self, checkpoint_dir, step):
-  return
-        # model_name = "pix2pix.model"
-        # model_dir = "%s_%s_%s" % (self.dataset_name, self.batch_size, self.output_size)
-        # checkpoint_dir = os.path.join(checkpoint_dir, model_dir)
-
-        # if not os.path.exists(checkpoint_dir):
-        #     os.makedirs(checkpoint_dir)
-        #
-        # self.saver.save(self.sess,
-        #                 os.path.join(checkpoint_dir, model_name),
-        #                 global_step=step)
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()

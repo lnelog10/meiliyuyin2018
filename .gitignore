@@ -15,8 +15,7 @@ __pycache__/
 # data related
 data_set/
 0001/
-data_pre_process/*.mp4
-data_pre_process/*.mp3
+data_pre_process/*
 
 # Executables
 *.swf

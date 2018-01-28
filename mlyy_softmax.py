@@ -25,6 +25,7 @@ import argparse
 import sys
 import tensorflow as tf
 import mlyy_dataset as input_data
+import os;
 
 VOICEDATA_LENTH = 13*25;#28*28=784
 CLASSIFIER_TYPE = 6;#10
@@ -59,20 +60,52 @@ def main(_):
 
   sess = tf.InteractiveSession()
   tf.global_variables_initializer().run()
+  if load():
+    print(" [*] Load SUCCESS")
+  else:
+    print(" [!] Load failed...")
   # Train
   for _ in range(1000):
     batch_xs, batch_ys = mlyy_dataset.train.next_batch(100)
     sess.run(train_step, feed_dict={x: batch_xs, y_: batch_ys})
+  save();
 
   # Test trained model
   correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(y_, 1))
   accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
   print(sess.run(accuracy, feed_dict={x: mlyy_dataset.test.images,
                                       y_: mlyy_dataset.test.labels}))
+  sample_model(x=x,W=W,b=b)
+
+def sample_model(self,x,W,b):
+    y = tf.matmul(x, W) + b
+
+
+def save(self, checkpoint_dir="checkpoint_dir",model_dir="model_dir"):
+  model_name = "pix2pix.model"
+  # model_dir = "%s_%s_%s" % (self.dataset_name, self.batch_size, self.output_size)
+  checkpoint_dir = os.path.join(checkpoint_dir, model_dir)
+  if not os.path.exists(checkpoint_dir):
+    os.makedirs(checkpoint_dir)
+  self.saver.save(self.sess,os.path.join(checkpoint_dir, model_name))
+
+
+def load(self, checkpoint_dir="checkpoint_dir",model_dir="model_dir"):
+  print(" [*] Reading checkpoint...")
+  # model_dir = "%s_%s_%s" % (self.dataset_name, self.batch_size, self.output_size)
+  checkpoint_dir = os.path.join(checkpoint_dir, model_dir)
+  ckpt = tf.train.get_checkpoint_state(checkpoint_dir)
+  if ckpt and ckpt.model_checkpoint_path:
+    ckpt_name = os.path.basename(ckpt.model_checkpoint_path)
+    self.saver.restore(self.sess, os.path.join(checkpoint_dir, ckpt_name))
+    return True
+  else:
+    return False
 
 if __name__ == '__main__':
-  parser = argparse.ArgumentParser()
-  parser.add_argument('--data_dir', type=str, default='/tmp/tensorflow/mnist/input_data',
-                      help='Directory for storing input data')
-  FLAGS, unparsed = parser.parse_known_args()
-  tf.app.run(main=main, argv=[sys.argv[0]] + unparsed)
+  with tf.Session() as sess:
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--data_dir', type=str, default='/tmp/tensorflow/mnist/input_data',
+                        help='Directory for storing input data')
+    FLAGS, unparsed = parser.parse_known_args()
+    tf.app.run(main=main, argv=[sys.argv[0]] + unparsed)
