@@ -51,7 +51,11 @@ def clasifyWitchLipType(imgName):
 
 def main():
     MouthTypeUtil.initAllTypeMouth()
-    clasifyLipTypeInDir("0001")
+    dirs = glob.glob("data_pre_process")
+    for dir in dirs:
+        if os.path.isdir(dir):
+            print("[info]:"+dir)
+            clasifyLipTypeInDir(dir)
 
 if __name__ == '__main__':
     main()
