@@ -7,7 +7,7 @@ from MouthInfo import MouthInfo
 """
 测试开关，打开的时候，在保存n种嘴型信息的时候，会把嘴打印出来
 """
-TEST_TYPE_LIPS_MOUTH = False
+TEST_TYPE_LIPS_MOUTH = True
 
 """
 测试开关，打开的时候，在区分数据是何种嘴型时候，会打印一些信息
@@ -18,15 +18,23 @@ TEST_COMPARE_TO_TRAIN_DATA = False
 n种嘴型信息对应的人脸图片
 """
 LIP_TYPES = [
-            "1.jpg",
-            "2.jpg",
-            "3.jpg",
-            "4.jpg",
-            "5.jpg",
-            "6.jpg",
-            "7.jpg",
-            "8.jpg",
-            "9.jpg",
+            "1.png",
+            "2.png",
+            "3.png",
+            "4.png",
+            "5.png",
+            "6.png",
+            "7.png",
+            "8.png",
+            "9.png",
+            "10.png",
+            "11.png",
+            "12.png",
+            "13.png",
+            "14.png",
+            "15.png",
+            "16.png",
+            "17.png",
              ]
 
 """
@@ -53,7 +61,7 @@ def getFacePoint(image):
 
 def initTypeMouthInfo(index):
     image = cv2.imread(LIP_TYPES[index])
-    image = imutils.resize(image,width=250)
+    image = imutils.resize(image, width=1200)
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
     shape = getFacePoint(gray)
@@ -66,7 +74,7 @@ def initTypeMouthInfo(index):
     if TEST_TYPE_LIPS_MOUTH:
         for i in range(image.shape[0]):
             for j in range(image.shape[1]):
-                image[j,i] = (255,255,255)
+                image[i,j] = (255,255,255)
 
         for i in range(len(shape)):
             if(i >= 48 and i <= 67):
