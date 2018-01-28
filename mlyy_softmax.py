@@ -25,18 +25,24 @@ import argparse
 import sys
 import tensorflow as tf
 import mlyy_dataset as input_data
-import os;
 import glob as gb
 import os;
-import scipy.misc
-import numpy
+import shutil
 import numpy as np
 from mlyy_softmax_sample_utils import ffmpegGenVideo
+from mlyy_softmax_sample_utils import ffmpegTrans2mp3
+from mlyy_softmax_sample_utils import sample_voice_process
+from AudioUtils import recordAndSaveAudio
+import AudioUtils
 
 VOICEDATA_LENTH = 13*25;#28*28=784
 CLASSIFIER_TYPE = 6;#10
 Pre_Train_Dir_Path = "./data_set/train"
 Post_Train_Dir_Path = "./data_set/train_real"
+gen_sample_voices = "./sample/gen_sample_voices/"  # *.txt
+gen_sample_images = "./sample/gen_sample_images/"  # *.jpg
+sample_mp3 = "./sample/K.mp3"
+out_mp4 = "./sample/K.mp4"
 
 def main(_):
   # Import data
@@ -83,30 +89,37 @@ def main(_):
                                       y_: mlyy_dataset.test.labels}))
 
   print("sample_model...")
+  recordAndSaveAudio()
+  # 转化mp3
+  ffmpegTrans2mp3(wmvPath=AudioUtils.WAVE_OUTPUT_FILENAME,mp3Path=sample_mp3);
+  # 音频mfcc信息的提取
+  sample_voice_process(dir=gen_sample_voices, mp3Path=sample_mp3)
   sample_model(W=W,b=b)
 
-gen_sample_voices = "./sample/gen_sample_voices/"  # *.txt
-gen_sample_images = "./sample/gen_sample_images/"  # *.jpg
-sample_mp3 = "./sample/K.mp3"
-out_mp4 = "./sample/K.mp4"
+
 # 3.mp3输出对应嘴形视频
 # 3.1mp3 mfcc提取，生成txt
 # 3.2restore 网络参数，跑softmax 找到对应分类嘴形--->copy 到sample目录
 # 3.3sample里 mp3和嘴形合成视频
 def sample_model(self,W,b,sampleVoiceTxts=gen_sample_voices):
     print('extract_voices', sampleVoiceTxts)
-    rootExt = sampleVoiceTxts + os.sep + "*"
+    rootExt = sampleVoiceTxts + "*"
     txts = gb.glob(rootExt)
     voiceFeatures = np.zeros((txts.__len__(), 13, 25))
     for index in range(len(txts)):
       voiceFeatures[index] = np.loadtxt(txts[index]);
       y = tf.matmul(voiceFeatures[index], W) + b
-      #取出序号 TODO
-      cat =y
-      #保存图片
-      scipy.misc.imsave(gen_sample_images, getSampleImgName(voicePath=txts[index],sample_dir=gen_sample_voices,))
+      #取出序号
+      k = getIndexOfY(y=y)
+      #复制对应目录下的图片
+      shutil.copy("./"+k+".png", getSampleImgName(voicePath=txts[index],sample_dir=gen_sample_images))
     print("ffmpegGenVideo...")
     ffmpegGenVideo(imageSlicesDir=gen_sample_images,mp3SampleFile=sample_mp3,outfile=out_mp4)
+
+def getIndexOfY(y):
+    for k in range(len(y)):
+        if y[k] != 0:
+            return k+1
 
 def getSampleImgName(voicePath,sample_dir):
     fileName = voicePath[voicePath.rindex("/")+1:]
