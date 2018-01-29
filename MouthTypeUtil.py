@@ -50,19 +50,24 @@ def getFacePoint(image):
     rects = detector(image,1)
 
     #只取第一个脸,因为保证只有一个脸
-    rect = rects[0]
+    if len(rects) == 0:
+        return None
 
-    #根据框出的人脸，找到人脸所有点（68个点）的坐标
-    point = predictor(image,rect)
-    point = face_utils.shape_to_np(point)
+    else:
+        rect = rects[0]
 
-    return point
+        #根据框出的人脸，找到人脸所有点（68个点）的坐标
+        point = predictor(image,rect)
+        point = face_utils.shape_to_np(point)
+        return point
 
 def generate112image():
     for index in range(len(LIP_TYPES)):
         image = cv2.imread(LIP_TYPES[index])
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         shape = getFacePoint(gray)
+
+
         (leftX, leftY) = shape[0]
         (rightX, rightY) = shape[16]
         (topX, topY) = shape[27]
@@ -147,10 +152,16 @@ def clasifyMouthType(imgName):
 
     minIndex = -1;
     minDistance = 100000;
+    errorHappened = False
 
     for i in range(len(MOUTH_TYPE_INFO_ARRAY)):
         mouthInfo = MOUTH_TYPE_INFO_ARRAY[i]
         comparedPoint = getFacePoint(gray)
+        # 没有识别出人脸不往下执行
+        if comparedPoint is None:
+            errorHappened = True
+            break
+
         imageMouthWidth = MouthInfo.getMouthWidth(comparedPoint)
         imageWidth = image.shape[1]
 
@@ -158,6 +169,10 @@ def clasifyMouthType(imgName):
         imageNeedExpand = int(mouthInfo.getWidth() * imageWidth / imageMouthWidth)
         expandImage = imutils.resize(gray,width = imageNeedExpand)
         expandPoint = getFacePoint(expandImage)
+        if expandPoint is None:
+            errorHappened = True
+            break
+
         expandMouthInfo = MouthInfo(expandPoint)
 
         if(TEST_COMPARE_TO_TRAIN_DATA):
@@ -180,7 +195,10 @@ def clasifyMouthType(imgName):
             minDistance = distance
             minIndex = i
 
-    return minIndex
+    if errorHappened:
+        return -1
+    else:
+        return minIndex
 
 if __name__ == "__main__":
     initAllTypeMouth()

@@ -21,6 +21,10 @@ def clasifyLipTypeInDir(dir):
         imgFilesPath = glob.glob(imgFilesPattern)
         for imgFile in imgFilesPath:
             lipType = clasifyWitchLipType(imgFile)
+            if(lipType == -1):
+                print("[error] classify face failure, deal next picture ")
+                continue
+
             print("[info]file:"+imgFile+" lipType:"+str(lipType))
             destDir = os.path.join(TRAIN_DATA,str(lipType))
 
@@ -50,7 +54,7 @@ def clasifyWitchLipType(imgName):
 
 
 def main():
-    # MouthTypeUtil.generate112image()
+    MouthTypeUtil.generate112image()
     MouthTypeUtil.initAllTypeMouth()
     dirs = glob.glob("data_pre_process")
     for dir in dirs:
