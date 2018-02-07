@@ -32,7 +32,7 @@ VOICE_FRAGMENT_LENGTH = 250
 def ffmpegGenVideo(imageSlicesDir,mp3SampleFile,outfile):
     # os.system("ffmpeg -threads2 -y -r 4 -i "+imageSlicesDir+"image%04d.jpg -i "+mp3SampleFile+" -absf aac_adtstoasc "+outfile)
     # -r 是frame rate
-    os.system("ffmpeg -y -r 3 -i "+imageSlicesDir+"K%04d.jpg -i "+mp3SampleFile+" -absf aac_adtstoasc -strict -2 "+outfile)
+    os.system("ffmpeg -y -r 3 -i "+imageSlicesDir+"%04d.jpg -i "+mp3SampleFile+" -absf aac_adtstoasc -strict -2 "+outfile)
 
 def sample_voice_process(dir, SampleVoice):
     song = AudioSegment.from_mp3(SampleVoice)

@@ -32,14 +32,14 @@ def clasifyLipTypeInDir(dir):
             if not os.path.exists(destDir):
                 os.makedirs(destDir)
 
-            #将图片移动至对应分类的文件夹下面
-            shutil.copy(imgFile,destDir)
-
             #将与图片同名的文件夹也放到对应分类的文件夹下面
             basename = imgFile.split(".")[0]
             print("voicename:"+basename)
             voiceTxtName = basename + ".txt"
-            shutil.copy(voiceTxtName,destDir)
+            if os.path.exists(voiceTxtName):
+                shutil.copy(voiceTxtName,destDir)
+                # 将图片移动至对应分类的文件夹下面
+                shutil.copy(imgFile, destDir)
     else:
         print("[error]dir does not exist or not dir")
 
@@ -56,7 +56,7 @@ def clasifyWitchLipType(imgName):
 def main():
     MouthTypeUtil.generate112image()
     MouthTypeUtil.initAllTypeMouth()
-    dirs = glob.glob("data_pre_process")
+    dirs = glob.glob("data_pre_process/*")
     for dir in dirs:
         if os.path.isdir(dir):
             print("[info]:"+dir)

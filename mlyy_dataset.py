@@ -18,40 +18,56 @@ from tensorflow.python.framework import dtypes
 from tensorflow.python.framework import random_seed
 import mlyy_softmax as main
 
+#data size:15841
 
 def read_data_sets(train_dir,
                    one_hot=True,
                    dtype=dtypes.float32,
                    reshape=True,
-                   validation_size=100,
+                   validation_size=1500,
                    seed=None):
   train_images,train_labels = extract_voices(train_dir)
   train_images = np.array(train_images).astype(np.float32)
   train_labels = np.array(train_labels).astype(np.float32)
+
   train_images = train_images[validation_size:]
   train_labels = train_labels[validation_size:]
 
+  validation_images = train_images[750:validation_size]
+  validation_labels = train_labels[750:validation_size]
+
+  test_images = train_images[0:750]
+  test_labels = train_labels[0:750]
+
   options = dict(dtype=dtype, reshape=reshape, seed=seed)
   train = DataSet(train_images, train_labels, **options)
-  return base.Datasets(train=train,validation=train,test=train)
+  validation = DataSet(validation_images, validation_labels, **options)
+  test = DataSet(test_images, test_labels, **options)
+  return base.Datasets(train=train,validation=validation,test=test)
 
 def extract_voices(root):
   print('extract_voices', root)
   rootExt= root+os.sep+"*"
   txts = gb.glob(rootExt)
+  print('all data size:'+str(txts.__len__()))
   voiceFeatures=np.zeros((txts.__len__(),13,25))
   lables=np.zeros(txts.__len__(),dtype=np.int)
   for index in range(len(txts)):
-    voiceFeatures[index] = np.loadtxt(txts[index]);
-    # print('voiceFeature'+i, voiceFeatures[i])
-    #
-    basename = os.path.basename(txts[index])
-    filename, extension = os.path.splitext(basename)
-    args = filename.split("_")
-    lables[index] = args[1]
-    # print('lables' + i,lables[i])
-    result_lables = dense_to_one_hot(lables, num_classes=main.CLASSIFIER_TYPE)
+    baseName = os.path.basename(txts[index]);
+    if not (baseName.startswith("007")
+            or baseName.startswith("008")
+            ):
+      print(txts[index])
+      voiceFeatures[index] = np.loadtxt(txts[index]);
+      # print('voiceFeature'+i, voiceFeatures[i])
+      #
+      basename = os.path.basename(txts[index])
+      filename, extension = os.path.splitext(basename)
+      args = filename.split("_")
+      lables[index] = args[1]
+      # print('lables' + i,lables[i])
 
+  result_lables = dense_to_one_hot(lables, num_classes=main.CLASSIFIER_TYPE)
   return voiceFeatures,result_lables
 
 def dense_to_one_hot(labels_dense, num_classes):

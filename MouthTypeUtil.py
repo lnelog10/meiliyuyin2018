@@ -7,7 +7,7 @@ from MouthInfo import MouthInfo
 """
 测试开关，打开的时候，在保存n种嘴型信息的时候，会把嘴打印出来
 """
-TEST_TYPE_LIPS_MOUTH = True
+TEST_TYPE_LIPS_MOUTH = False
 
 """
 测试开关，打开的时候，在区分数据是何种嘴型时候，会打印一些信息

@@ -11,7 +11,7 @@ WAVE_OUTPUT_FILENAME = "output.wav"
 """
 录制时间，和输出的名字
 """
-def recordAndSaveAudio(recordtime, outputName):
+def recordAndSaveAudio(outputName=WAVE_OUTPUT_FILENAME):
     p = pyaudio.PyAudio()
     stream = p.open(format=FORMAT,
                 channels=CHANNELS,
@@ -37,4 +37,4 @@ def recordAndSaveAudio(recordtime, outputName):
     wf.close()
 
 
-recordAndSaveAudio(RECORD_SECONDS, WAVE_OUTPUT_FILENAME)
+# recordAndSaveAudio(WAVE_OUTPUT_FILENAME)
